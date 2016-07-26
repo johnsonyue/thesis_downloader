@@ -31,7 +31,7 @@ def download_caida_restricted_worker(url, dir, file, username, password, proxy="
 			os.remove(dir+file);
 			res = False;
 	
-	print url.split('/')[-1] + " " + proxy + " " + str(res) + " " + (ex if ex==None else "succeeded");
+	print url.split('/')[-1] + " " + proxy + " " + str(res) + " " + (str(ex) if ex!=None else "succeeded");
 	
 	return res;
 
