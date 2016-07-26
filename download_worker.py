@@ -4,25 +4,36 @@ import os
 import cookielib
 
 #caida restricted.
-def download_caida_restricted_worker(url, dir, file, username, password):
+def download_caida_restricted_worker(url, dir, file, username, password, proxy=""):
 	passwd_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm();
 	passwd_mgr.add_password("topo-data", url, username, password);
 
 	opener = urllib2.build_opener(urllib2.HTTPBasicAuthHandler(passwd_mgr));
 
+	if(proxy != ""):
+		opener.add_handler(urllib2.ProxyHandler({"http":proxy}));
+
 	if not os.path.exists(dir):
 		os.makedirs(dir);
 
-	CHUNK = 16*1024;
-	if not os.path.exists(dir+file):
-		f = opener.open(url);
-		fp = open(dir+file, 'wb');
-		while True:
-			chunk = f.read(CHUNK);
-			if not chunk:
-				break;
-			fp.write(chunk);
-		fp.close();
+	res = True;
+	ex = None;
+	try:
+		if not os.path.exists(dir+file):
+			f = opener.open(url, timeout=10);
+			fp = open(dir+file, 'wb');
+			fp.write(f.read());
+			fp.close();
+			f.close();
+	except Exception, e:
+		ex = e;
+		if os.path.exists(dir+file):
+			os.remove(dir+file);
+			res = False;
+	
+	print url.split('/')[-1] + " " + proxy + " " + str(res) + " " + (ex if ex==None else "succeeded");
+	
+	return res;
 
 def download_iplane_restricted_worker(url, dir, file, username, password):
 	print "logging in...";
