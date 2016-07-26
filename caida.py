@@ -202,6 +202,11 @@ def download_time(time, list_file_name="caida", root_dir="data/caida/ipv4/", pro
 				if (cur_proxy >= len(proxy_list)):
 					cur_proxy = 0;
 
+				if( os.path.exists(dir+file) ):
+                                        print "skipping existing file: "+file;
+                                        is_finished[ind] = True;
+                                        break;
+
 				th = threading.Thread(target=download_caida_restricted_worker_mt_wrapper, args=( url,dir,file,auth[0],auth[1],is_finished,ind,proxy,) );
 				th_pool.append(th);
 				cnt = cnt + 1;
