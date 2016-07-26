@@ -217,4 +217,4 @@ def download_time(time, list_file_name="caida", root_dir="data/caida/ipv4/", pro
 #update_caida_tree("00000000", "", "15b903031@hit.edu.cn", "yuzhuoxun123");
 #update_caida_tree(get_latest_time("caida"), "", "15b903031@hit.edu.cn", "yuzhuoxun123");
 #download_time("20160628");
-download_time("20160628", proxy_file="proxy_list", mt_num=3);
+download_time("20160628", proxy_file="proxy_list", mt_num=30);
