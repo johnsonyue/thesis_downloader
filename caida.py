@@ -235,4 +235,12 @@ def download_time(time, list_file_name="caida", root_dir="data/caida/ipv4/", pro
 #update_caida_tree("00000000", "", "15b903031@hit.edu.cn", "yuzhuoxun123");
 #update_caida_tree(get_latest_time("caida"), "", "15b903031@hit.edu.cn", "yuzhuoxun123");
 #download_time("20160628");
-download_time("20160725", proxy_file="proxy_list", mt_num=10);
+
+start_time = time.time();
+download_time("20160723", proxy_file="proxy_list", mt_num=10);
+end_time = time.time();
+
+time_used = end_time - start_time;
+file_num = len(get_time_list("caida", "20160723"));
+
+print "finished downloading "+str(file_num)+" files in "+str(time_used)+" seconds";
