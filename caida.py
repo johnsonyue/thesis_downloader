@@ -3,6 +3,7 @@ import urllib2
 import re
 import os
 import threading
+import time
 import download_worker
 
 #html parsers.
@@ -154,6 +155,16 @@ def download_caida_restricted_worker_mt_wrapper(url, dir, file, username, passwo
 	res = download_worker.download_caida_restricted_worker(url, dir, file, username, password, proxy);
 	res_list[ind] = res;
 
+class DownloadThread(threading.Thread):
+	def __init__(self, target, args):
+		threading.Thread.__init__(self, target=target, args=args);
+		self.start_time = time.time();
+	
+	def get_time_alive(self):
+		end_time = time.time();
+		return end_time - self.start_time;
+		
+
 def download_time(time, list_file_name="caida", root_dir="data/caida/ipv4/", proxy_file="", mt_num=0 ):
 	auth = read_auth("auth", "caida");
 	url_list = get_time_list(list_file_name, time);
@@ -190,7 +201,6 @@ def download_time(time, list_file_name="caida", root_dir="data/caida/ipv4/", pro
 			if (len(task_list) == 0):
 				break;
 			
-			cnt = 0;
 			for i in range(len(task_list)):
 				url = url_list[task_list[i]];
 				team = url.split('/')[5];
@@ -207,19 +217,22 @@ def download_time(time, list_file_name="caida", root_dir="data/caida/ipv4/", pro
                                         is_finished[ind] = True;
                                         break;
 
-				th = threading.Thread(target=download_caida_restricted_worker_mt_wrapper, args=( url,dir,file,auth[0],auth[1],is_finished,ind,proxy,) );
+				th = DownloadThread(target=download_caida_restricted_worker_mt_wrapper, args=(url,dir,file,auth[0],auth[1],is_finished,ind,proxy,) );
 				th_pool.append(th);
-				cnt = cnt + 1;
+				th.start();
 				
-				if (cnt >= mt_num or i==len(task_list)-1):
-					for th in th_pool:
-						th.start();
-					for th in th_pool:
-						th.join();
+				cnt_alive = 0;
+				for t in th_pool:
+					if (t.is_alive() and t.get_time_alive() >= 3):
+						cnt_alive = cnt_alive + 1;
+				
+				if (cnt_alive >= mt_num or i==len(task_list)-1):
+					for t in th_pool:
+						t.join();
 					cnt = 0;
 					th_pool = [];
 
 #update_caida_tree("00000000", "", "15b903031@hit.edu.cn", "yuzhuoxun123");
 #update_caida_tree(get_latest_time("caida"), "", "15b903031@hit.edu.cn", "yuzhuoxun123");
 #download_time("20160628");
-download_time("20160628", proxy_file="proxy_list", mt_num=30);
+download_time("20160725", proxy_file="proxy_list", mt_num=10);
